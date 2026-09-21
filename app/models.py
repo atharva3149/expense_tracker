@@ -82,3 +82,18 @@ class AuthCredentials(BaseModel):
         if not isinstance(value, str):
             return value
         return value.strip().lower()
+
+    @field_validator("password")
+    @classmethod
+    def _validate_password(cls, value):
+        if not isinstance(value, str):
+            return value
+
+        letter_count = len(re.findall(r"[A-Za-z]", value))
+        if letter_count < 6:
+            raise ValueError("Password must contain at least 6 alphabetic characters")
+        if not re.search(r"\d", value):
+            raise ValueError("Password must contain at least one number")
+        if not re.search(r"[^A-Za-z0-9]", value):
+            raise ValueError("Password must contain at least one special character")
+        return value

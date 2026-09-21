@@ -46,15 +46,32 @@ async function request(path, options = {}, token = "") {
   return body;
 }
 
+function validatePassword(value) {
+  if (!value) return "Password is required";
+  if (value.length < 8) return "Password must be at least 8 characters";
+  const letterCount = (value.match(/[A-Za-z]/g) || []).length;
+  if (letterCount < 6) return "Password must contain at least 6 alphabetic characters";
+  if (!/\d/.test(value)) return "Password must contain at least one number";
+  if (!/[^A-Za-z0-9]/.test(value)) return "Password must contain at least one special character";
+  return "";
+}
+
 function AuthScreen({ onAuthenticated }) {
   const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
   async function submit(event) {
     event.preventDefault();
+    const nextPasswordError = mode === "register" ? validatePassword(password) : "";
+    setPasswordError(nextPasswordError);
+    if (nextPasswordError) {
+      setMessage(nextPasswordError);
+      return;
+    }
     setBusy(true);
     setMessage("");
     try {
@@ -115,13 +132,23 @@ function AuthScreen({ onAuthenticated }) {
               autoComplete={mode === "login" ? "current-password" : "new-password"}
               minLength="8"
               maxLength="128"
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="At least 8 characters"
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                setPassword(nextValue);
+                if (mode === "register") {
+                  setPasswordError(validatePassword(nextValue));
+                  if (!validatePassword(nextValue)) setMessage("");
+                }
+              }}
+              placeholder="Abcdefg1!"
               required
               type="password"
               value={password}
             />
           </label>
+          {passwordError && mode === "register" && (
+            <p className="form-message error">{passwordError}</p>
+          )}
           {message && <p className="form-message error">{message}</p>}
           <button className="primary-button" disabled={busy} type="submit">
             {busy ? "Working..." : mode === "login" ? "Open tracker" : "Create account"}

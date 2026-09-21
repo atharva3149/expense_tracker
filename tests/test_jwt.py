@@ -12,7 +12,7 @@ def make_jwt_client(tmp_path):
     return TestClient(app)
 
 
-def register(client, username="alice", password="correct-horse"):
+def register(client, username="alice", password="Abcdefg1!"):
     response = client.post(
         "/auth/register", json={"username": username, "password": password}
     )
@@ -30,23 +30,43 @@ class TestJwtAuth:
 
             response = client.post(
                 "/auth/login",
-                json={"username": "ALICE", "password": "correct-horse"},
+                json={"username": "ALICE", "password": "Abcdefg1!"},
             )
             assert response.status_code == 200
             assert response.json()["access_token"]
+
+    def test_password_must_include_letters_number_and_special_character(self, tmp_path):
+        with make_jwt_client(tmp_path) as client:
+            invalid = client.post(
+                "/auth/register",
+                json={"username": "alice", "password": "abc123"},
+            )
+            assert invalid.status_code == 422
+
+            valid = client.post(
+                "/auth/register",
+                json={"username": "alicenew", "password": "P@ssw0rd"},
+            )
+            assert valid.status_code == 201
+
+            also_valid = client.post(
+                "/auth/register",
+                json={"username": "alexnew", "password": "Abcdefg1!"},
+            )
+            assert also_valid.status_code == 201
 
     def test_duplicate_and_invalid_login_are_rejected(self, tmp_path):
         with make_jwt_client(tmp_path) as client:
             register(client)
             duplicate = client.post(
                 "/auth/register",
-                json={"username": "alice", "password": "another-pass"},
+                json={"username": "alice", "password": "Abcdefg2!"},
             )
             assert duplicate.status_code == 409
 
             invalid = client.post(
                 "/auth/login",
-                json={"username": "alice", "password": "wrong-pass"},
+                json={"username": "alice", "password": "Abcdefg9!"},
             )
             assert invalid.status_code == 401
 
@@ -82,6 +102,6 @@ class TestJwtAuth:
         with TestClient(app) as client:
             response = client.post(
                 "/auth/register",
-                json={"username": "alice", "password": "correct-horse"},
+                json={"username": "alice", "password": "Abcdefg1!"},
             )
             assert response.status_code == 503

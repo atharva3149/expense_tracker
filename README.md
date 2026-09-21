@@ -75,8 +75,16 @@ JWT is the recommended authentication mode for the React client. Set
 ### `POST /auth/register`
 
 ```json
-{ "username": "alex", "password": "at-least-8-characters" }
+{ "username": "alex", "password": "Abcdefg1!" }
 ```
+
+The password must include:
+- at least one special character
+- at least one number
+- at least 6 alphabetic characters
+- at least one letter overall
+
+Example valid password: `P@ssw0rd`
 
 Returns `201` with an access token and user object. Usernames are normalized to
 lowercase, and duplicate usernames return `409`.
