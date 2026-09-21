@@ -75,7 +75,6 @@ function AuthScreen({ onAuthenticated }) {
   return (
     <main className="auth-page">
       <section className="auth-card">
-        <div className="brand-mark">ST</div>
         <p className="eyebrow">Personal finance, without the noise</p>
         <h1>Keep your spending visible.</h1>
         <p className="lede">
@@ -128,9 +127,6 @@ function AuthScreen({ onAuthenticated }) {
             {busy ? "Working..." : mode === "login" ? "Open tracker" : "Create account"}
           </button>
         </form>
-        <p className="auth-note">
-          JWT auth is enabled by setting <code>SPEND_TRACKER_JWT_SECRET</code> on the API.
-        </p>
       </section>
     </main>
   );
